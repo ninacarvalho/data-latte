@@ -24,6 +24,7 @@ public class FakeExtractor implements Extractor<Map<String,Object>> {
                 if (is == null) throw new IllegalArgumentException("Resource not found: " + path);
                 List<Map<String,Object>> page = MAPPER.readValue(is, new TypeReference<>() {});
                 out.addAll(page);
+                out.sort(java.util.Comparator.comparing(m -> ((Number)m.get("id")).longValue()));
             } catch (Exception e) {
                 throw new RuntimeException("Failed to load fixture: " + path, e);
             }
