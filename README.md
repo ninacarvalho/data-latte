@@ -23,16 +23,52 @@ docker --version && docker compose version
 
 ---
 
-### Run Locally
+## Run and Test Locally
+### 1) Start Kafka
 ```bash
-# start Kafka (KRaft)
 docker compose up -d
-
-# run app
-mvn spring-boot:run
+```
+check:
+```bash
+docker ps
 ```
 
-To stop:
+### 2 Create topics
+```bash
+docker exec -it kafka kafka-topics --create \
+  --topic etl.github.events --bootstrap-server localhost:9092 \
+  --partitions 1 --replication-factor 1 \
+  --config retention.ms=$((7*24*60*60*1000))
+```
+
+```bash
+docker exec -it kafka kafka-topics --describe \
+  --topic etl.github.events --bootstrap-server localhost:9092
+```
+
+### 3) Start a consumer
+
+```bash
+docker exec -it kafka kafka-console-consumer \
+--bootstrap-server localhost:9092 \
+--topic etl.github.events --from-beginning \
+--property print.key=true --property print.headers=true
+```
+Leave this running.
+
+### 4) Run the app
+
+```bash
+mvn -q -DskipTests spring-boot:run
+```
+
+### To stop:
 ```bash
 docker compose down
+```
+ ### Clean slate
+```bash
+docker compose down -v
+docker system prune -af
+docker volume ls | awk '/kafka|zookeeper/ {print $2}' | xargs -r docker volume rm
 ```
