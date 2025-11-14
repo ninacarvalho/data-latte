@@ -15,7 +15,7 @@ public record HttpJsonArrayExtractor(RestTemplate rest, String url)
             new ParameterizedTypeReference<>() {};
 
     @Override
-    public List<Map<String,Object>> fetchAll() {
+    public Iterable<Map<String,Object>> fetchAll() {
         ResponseEntity<List<Map<String,Object>>> resp =
                 rest.exchange(url, HttpMethod.GET, null, LIST_OF_MAP);
         List<Map<String,Object>> body = resp.getBody();

@@ -9,6 +9,7 @@ import org.springframework.web.client.RestTemplate;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.StreamSupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.client.ExpectedCount.once;
@@ -34,7 +35,8 @@ class HttpJsonArrayExtractorTest {
                 .andRespond(withSuccess(body, MediaType.APPLICATION_JSON));
 
         Extractor<Map<String,Object>> ex = new HttpJsonArrayExtractor(rt, URL);
-        List<Map<String,Object>> out = ex.fetchAll();
+        Iterable<Map<String,Object>> raw = ex.fetchAll();
+        List<Map<String,Object>> out = StreamSupport.stream(raw.spliterator(), false).toList();
 
         assertThat(out).isNotEmpty();
         assertThat(out.get(0)).containsKeys("id","type","actor","repo","created_at");

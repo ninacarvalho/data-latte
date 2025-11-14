@@ -25,12 +25,17 @@ public class PipelineRunner<I, O> implements Pipeline {
 
     /** Execute one ETL pass and return transformed results. */
     public List<O> runOnceAndReturn() {
-        List<I> raw = extractor.fetchAll();
-        int inCount = raw.size();
-        List<O> out = new ArrayList<>(inCount);
-        for (I item : raw) {
-            out.add(transformer.apply(item));
+        Iterable<I> raw = extractor.fetchAll();
+        int inCount = 0;
+        List<O> out = new ArrayList<>();
+
+        if (raw !=null ) {
+            for (I item : raw) {
+                inCount++;
+                out.add(transformer.apply(item));
+            }
         }
+
         log.info("etl_run stage=extract count={}", inCount);
         log.info("etl_run stage=transform count={}", out.size());
         return out;
