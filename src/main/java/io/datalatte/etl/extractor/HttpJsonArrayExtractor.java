@@ -1,24 +1,28 @@
 package io.datalatte.etl.extractor;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.List;
-import java.util.Map;
-
 public record HttpJsonArrayExtractor(RestTemplate rest, String url)
-        implements Extractor<Map<String,Object>> {
+        implements Extractor<JsonNode> {
 
-    private static final ParameterizedTypeReference<List<Map<String,Object>>> LIST_OF_MAP =
+    private static final ParameterizedTypeReference<JsonNode> JSON_NODE =
             new ParameterizedTypeReference<>() {};
 
     @Override
-    public Iterable<Map<String,Object>> fetchAll() {
-        ResponseEntity<List<Map<String,Object>>> resp =
-                rest.exchange(url, HttpMethod.GET, null, LIST_OF_MAP);
-        List<Map<String,Object>> body = resp.getBody();
-        return body == null ? List.of() : body;
+    public Iterable<JsonNode> fetchAll() {
+        ResponseEntity<JsonNode> resp =
+                rest.exchange(url, HttpMethod.GET, null, JSON_NODE);
+
+        JsonNode body = resp.getBody();
+
+        if (body == null || !body.isArray()) {
+            return java.util.List.of();
+        }
+
+        return body;
     }
 }

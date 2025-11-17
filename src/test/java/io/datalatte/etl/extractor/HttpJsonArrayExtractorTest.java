@@ -1,5 +1,6 @@
 package io.datalatte.etl.extractor;
 
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.Test;
 import org.springframework.http.MediaType;
@@ -34,12 +35,19 @@ class HttpJsonArrayExtractorTest {
         server.expect(once(), requestTo(URL))
                 .andRespond(withSuccess(body, MediaType.APPLICATION_JSON));
 
-        Extractor<Map<String,Object>> ex = new HttpJsonArrayExtractor(rt, URL);
-        Iterable<Map<String,Object>> raw = ex.fetchAll();
-        List<Map<String,Object>> out = StreamSupport.stream(raw.spliterator(), false).toList();
+        HttpJsonArrayExtractor ex = new HttpJsonArrayExtractor(rt, URL);
 
-        assertThat(out).isNotEmpty();
-        assertThat(out.get(0)).containsKeys("id","type","actor","repo","created_at");
+        Iterable<JsonNode> raw = ex.fetchAll();
+
+        List<JsonNode> out = StreamSupport.stream(raw.spliterator(), false).toList();
+
+        JsonNode first = out.get(0);
+
+        assertThat(first.has("id")).isTrue();
+        assertThat(first.has("type")).isTrue();
+        assertThat(first.has("actor")).isTrue();
+        assertThat(first.has("repo")).isTrue();
+        assertThat(first.has("created_at")).isTrue();
 
         server.verify();
     }

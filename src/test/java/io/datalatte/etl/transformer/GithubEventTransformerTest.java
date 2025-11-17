@@ -1,14 +1,14 @@
 package io.datalatte.etl.transformer;
 
 import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import io.datalatte.etl.model.GithubEvent;
 import org.junit.jupiter.api.Test;
 
 import java.io.InputStream;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -17,33 +17,42 @@ class GithubEventTransformerTest {
 
     @Test
     void maps_sample_events_exactly() throws Exception {
-        List<Map<String,Object>> raw = readMaps("fixtures/github_events_page1.json");
-        List<Map<String,Object>> expected = readMaps("fixtures/expected_github_events_transformed.json");
+        List<JsonNode> raw = readNodes("fixtures/github_events_page1.json");
+        List<JsonNode> expected = readNodes("fixtures/expected_github_events_transformed.json");
 
-        Transformer<Map<String,Object>, GithubEvent> tx = new GithubEventTransformer();
-        List<Map<String,Object>> actual = raw.stream()
+        Transformer<JsonNode, GithubEvent> tx = new GithubEventTransformer();
+
+        List<JsonNode> actual = raw.stream()
                 .map(tx::apply)
-                .map(GithubEventTransformerTest::toExpectedShape) // model -> map with keys matching fixture
+                .map(GithubEventTransformerTest::toExpectedShape)
                 .toList();
 
         assertEquals(expected, actual);
     }
 
-    private static List<Map<String,Object>> readMaps(String p) throws Exception {
-        try (InputStream is = Thread.currentThread().getContextClassLoader().getResourceAsStream(p)) {
-            return M.readValue(is, new TypeReference<>() {});
+    private static List<JsonNode> readNodes(String path) throws Exception {
+        try (InputStream is = Thread.currentThread()
+                .getContextClassLoader()
+                .getResourceAsStream(path)) {
+            return M.readValue(is, new TypeReference<List<JsonNode>>() {});
         }
     }
 
-    private static Map<String,Object> toExpectedShape(GithubEvent e) {
-        Map<String,Object> m = new LinkedHashMap<>();
-        m.put("id", e.getId());
-        m.put("eventType", e.getEventType());
-        m.put("actor", e.getActor());
-        m.put("repo", e.getRepo());
-        m.put("org", e.getOrg());              // may be null
-        m.put("createdAt", e.getCreatedAt());
-        m.put("public", e.isPublic());         // key name matches expected JSON
-        return m;
+    public static JsonNode toExpectedShape(GithubEvent e) {
+        ObjectNode node = M.createObjectNode();
+        node.put("id", e.getId());
+        node.put("eventType", e.getEventType());
+        node.put("actor", e.getActor());
+        node.put("repo", e.getRepo());
+
+        if (e.getOrg() == null) {
+            node.putNull("org");
+        } else {
+            node.put("org", e.getOrg());
+        }
+        node.put("createdAt", e.getCreatedAt());
+        node.put("public", e.isPublic());
+
+        return node;
     }
 }

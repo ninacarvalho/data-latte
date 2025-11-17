@@ -10,10 +10,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.function.Consumer;
 
-/**
- * Minimal pipeline runner (no framework).
- * Extracts all records, transforms each, returns transformed list.
- */
+
 public class PipelineRunner<I, O> implements Pipeline {
     private static final Logger log = LoggerFactory.getLogger(PipelineRunner.class);
 

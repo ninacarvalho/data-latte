@@ -1,48 +1,56 @@
 package io.datalatte.etl.transformer;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.NullNode;
 import io.datalatte.etl.model.GithubEvent;
 import java.util.Map;
 
-public class GithubEventTransformer implements Transformer<Map<String,Object>, GithubEvent> {
+public class GithubEventTransformer implements Transformer<JsonNode, GithubEvent> {
 
     @Override
-    public GithubEvent apply(Map<String,Object> in) {
+    public GithubEvent apply(JsonNode in) {
         if (in == null) throw new IllegalArgumentException("input is null");
 
-        String id = str(in.get("id"));
-        String type = str(in.get("type"));
+        String id = nodeToString(in.get("id"));
+        String type = nodeToString(in.get("type"));
+
         if (id.isBlank() || type.isBlank()) {
             throw new IllegalArgumentException("id and type required");
         }
 
-        Map<String,Object> actor = getMap(in.get("actor"));
-        Map<String,Object> repo  = getMap(in.get("repo"));
-        Map<String,Object> org   = getMap(in.get("org"));
+        JsonNode actor = textOrEmpty(in.get("actor"));
+        JsonNode repo  = textOrEmpty(in.get("repo"));
+        JsonNode org   = textOrEmpty(in.get("org"));
 
         return GithubEvent.builder()
                 .id(id)
                 .eventType(type)
-                .actor(str(actor.get("login")))
-                .repo(str(repo.get("name")))
-                .org(org.isEmpty() ? null : str(org.get("login")))
-                .createdAt(str(in.get("created_at")))
-                .isPublic(bool(in.get("public")))
+                .actor(nodeToString(actor.get("login")))
+                .repo(nodeToString(repo.get("name")))
+                .org(org.isEmpty() ? null : nodeToString(org.get("login")))
+                .createdAt(nodeToString(in.get("created_at")))
+                .isPublic(nodeToBoolean(in.get("public")))
                 .build();
     }
 
-    @SuppressWarnings("unchecked")
-    private static Map<String,Object> getMap(Object o) {
-        return (o instanceof Map<?,?> m) ? (Map<String,Object>) m : Map.of();
+    // nullpointer prevention
+    private JsonNode textOrEmpty(JsonNode node) {
+        return (node != null && node.isObject()) ? node : NullNode.getInstance();
     }
 
-    private static String str(Object o) {
-        return o == null ? "" : o.toString().trim();
+    private static String nodeToString(JsonNode node) {
+        if (node == null || node.isNull()) return "";
+        String rawText = node.asText();
+        return rawText == null ? "" : rawText.trim();
     }
 
-    private static boolean bool(Object o) {
-        if (o instanceof Boolean b) return b;
-        if (o instanceof String s) return s.equalsIgnoreCase("true") || s.equals("1");
-        if (o instanceof Number n) return n.intValue() != 0;
-        return false;
+    private static boolean nodeToBoolean(JsonNode node) {
+        if (node == null || node.isNull()) return false;
+        if (node.isBoolean()) return node.booleanValue();
+        if (node.isNumber()) return node.intValue() != 0;
+        if (node.isTextual()) {
+            String s = node.asText();
+            return "true".equalsIgnoreCase(s) || "1".equals(s);
+        }    return false;
     }
 }
