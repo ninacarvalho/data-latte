@@ -72,3 +72,42 @@ docker compose down -v
 docker system prune -af
 docker volume ls | awk '/kafka|zookeeper/ {print $2}' | xargs -r docker volume rm
 ```
+
+## Architecture Diagram
+
+
+```mermaid
+flowchart LR
+  subgraph External[External]
+    API["Public REST API (JSON)"]
+  end
+
+  subgraph App["Spring Boot App"]
+    EX["Extractor (RestTemplate)"]
+    TR["Transformer (mapping, filtering)"]
+    PR["Producer (Spring Kafka)"]
+    CFG["Configuration (application.yml)"]
+    LOG[("Logging")]
+  end
+
+  subgraph Infra["Docker Compose Network"]
+    ZK["Zookeeper"]
+    KFK[("Kafka Broker")]
+    TOPIC[["Kafka Topic: etl.events"]]
+  end
+
+  API -->|HTTP GET| EX --> TR --> PR -->|produce| TOPIC
+  PR --> LOG
+  CFG -.-> EX
+  CFG -.-> PR
+  ZK --- KFK
+  KFK --- TOPIC
+
+  classDef comp fill:#eef,stroke:#999
+  classDef infra fill:#efe,stroke:#999
+  classDef data fill:#ffe,stroke:#aaa
+
+  class EX,TR,PR,CFG,LOG comp
+  class ZK,KFK infra
+  class TOPIC data
+```
