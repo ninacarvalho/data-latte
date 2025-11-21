@@ -22,7 +22,6 @@ public class PipelineRunner<I, O> implements Pipeline {
         this.transformer = transformer;
     }
 
-    /** Execute one ETL pass and return transformed results. */
     public List<O> runOnceAndReturn() {
         List<O> out = new ArrayList<>();
         processRecords(out::add);

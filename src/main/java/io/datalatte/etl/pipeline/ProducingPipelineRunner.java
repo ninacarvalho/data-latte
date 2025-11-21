@@ -8,9 +8,6 @@ import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
-/**
- * Extends PipelineRunner with a load stage that sends transformed results to a Producer (e.g. Kafka).
- */
 public class ProducingPipelineRunner<I, O> extends PipelineRunner<I, O> {
 
     private static final Logger log = LoggerFactory.getLogger(ProducingPipelineRunner.class);

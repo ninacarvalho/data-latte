@@ -3,7 +3,6 @@ package io.datalatte.etl.transformer;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.node.NullNode;
 import io.datalatte.etl.model.GithubEvent;
-import java.util.Map;
 
 public class GithubEventTransformer implements Transformer<JsonNode, GithubEvent> {
 
