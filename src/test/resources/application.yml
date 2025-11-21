@@ -1,0 +1,6 @@
+app:
+  api:
+    baseUrl: https://api.github.com/events
+    connectTimeoutMs: 3000
+    readTimeoutMs: 5000
+    pageSize: 100
