@@ -1,30 +1,45 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!--
+The Project Object Model (POM) file for the Data Latte project.
+Maven uses this file to manage the project's build, dependencies, and other configuration.
+-->
 <project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
+    <!--
+    Inherits default configurations from the Spring Boot project.
+    This parent POM provides dependency management for common libraries and sets up default build plugins.
+    -->
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
         <version>3.5.6</version>
-        <relativePath/>
+        <relativePath/> <!-- lookup parent from repository -->
     </parent>
 
+    <!-- Project coordinates -->
     <groupId>io.datalatte</groupId>
     <artifactId>data-latte</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <name>Data Latte</name>
     <description>ETL pipeline demo built with Spring Boot, Kafka, and Docker</description>
 
+    <!-- Project-wide properties -->
     <properties>
         <java.version>17</java.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
-    <!-- targeted overrides -->
+    <!--
+    Dependency Management: This section allows for managing dependency versions in one place.
+    These versions are applied to dependencies listed in the <dependencies> section.
+    This is used here for targeted overrides of versions managed by the Spring Boot parent.
+    -->
     <dependencyManagement>
         <dependencies>
+            <!-- Explicitly define logback versions to ensure consistency -->
             <dependency>
                 <groupId>ch.qos.logback</groupId>
                 <artifactId>logback-core</artifactId>
@@ -39,38 +54,39 @@
     </dependencyManagement>
 
 
+    <!-- Project dependencies -->
     <dependencies>
 
-        <!-- Core Spring Boot -->
+        <!-- Core Spring Boot dependency. Includes auto-configuration, logging, and YAML support. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter</artifactId>
         </dependency>
 
-        <!-- REST API layer -->
+        <!-- For building web applications, including RESTful APIs with Spring MVC. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
-        <!-- App metrics and health checks -->
+        <!-- Provides production-ready features like health checks, metrics, and monitoring. -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-actuator</artifactId>
         </dependency>
 
-        <!-- Kafka messaging -->
+        <!-- For integrating with Apache Kafka. -->
         <dependency>
             <groupId>org.springframework.kafka</groupId>
             <artifactId>spring-kafka</artifactId>
         </dependency>
 
 
-        <!-- Tests -->
+        <!-- Testing dependencies -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-test</artifactId>
-            <scope>test</scope>
+            <scope>test</scope> <!-- This dependency is only used for testing -->
         </dependency>
         <dependency>
             <groupId>org.mockito</groupId>
@@ -78,7 +94,10 @@
             <scope>test</scope>
         </dependency>
 
-        <!-- Lombok -->
+        <!--
+        Lombok: A library that automatically generates boilerplate code like getters, setters, and constructors.
+        The 'provided' scope means the dependency is available at compile time but not included in the final JAR.
+        -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -86,7 +105,10 @@
             <scope>provided</scope>
         </dependency>
 
-        <!-- YAML configuration binding -->
+        <!--
+        SnakeYAML: Required for Spring Boot's YAML configuration file binding.
+        Spring Boot's parent POM manages the version.
+        -->
         <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
@@ -94,8 +116,13 @@
 
     </dependencies>
 
+    <!-- Build configuration -->
     <build>
         <plugins>
+            <!--
+            Spring Boot Maven Plugin: Packages the application into an executable JAR file.
+            It also allows running the application directly using 'mvn spring-boot:run'.
+            -->
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>

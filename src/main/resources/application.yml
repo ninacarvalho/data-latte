@@ -1,12 +1,26 @@
+# Custom application properties
 app:
+  # The URL of the API from which to extract data. In this case, it's the GitHub Events API.
   api:
     url: https://api.github.com/events
+
+# Spring Boot specific properties
 spring:
+  # Kafka configuration for message brokering.
   kafka:
+    # A comma-separated list of host:port pairs for establishing the initial connection to the Kafka cluster.
     bootstrap-servers: localhost:9092
+    # Kafka producer configuration. These settings are for the component that sends messages to Kafka.
     producer:
+      # The number of acknowledgments the producer requires from the leader before considering a request complete.
+      # 'all' ensures that the record will not be lost as long as at least one in-sync replica remains alive.
       acks: all
+      # When set to 'true', the producer will ensure that exactly one copy of each message is written to the stream,
+      # which prevents duplicates.
       enable-idempotence: true
+      # The number of times the producer will automatically retry sending a message if a request fails.
       retries: 10
+      # The serializer for the message key. It converts the key object into a byte array.
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      # The serializer for the message value. Here, we use Spring's JsonSerializer to send JSON payloads.
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
